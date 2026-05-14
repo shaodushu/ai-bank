@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+@theme {
+  /* 字体族 */
+  --font-pingfang: 'PingFang SC', sans-serif;
+  --font-roboto: 'Roboto', sans-serif;
+  --font-alibaba: 'Alibaba PuHuiTi 2.0', sans-serif;
+  --font-xwfont: 'XWfont', sans-serif;
+
+  /* 文字颜色 */
+  --color-primary-text: rgba(0, 0, 0, 0.85);
+  --color-secondary-text: rgba(0, 0, 0, 0.60);
+  --color-tertiary-text: rgba(0, 0, 0, 0.45);
+  --color-quaternary-text: rgba(0, 0, 0, 0.65);
+  --color-placeholder-text: rgba(0, 0, 0, 0.15);
+  --color-primary-blue: #407FFF;
+  --color-dark-text: #242424;
+  --color-gray-text: #999999;
+  --color-light-gray: #9B9B9B;
+  --color-muted-text: #99A1AF;
+  --color-black-text: #000000;
+  --color-deep-dark: #1E2939;
+  --color-medium-gray: #545454;
+
+  /* 背景色 */
+  --color-card-bg: #F5F5F5;
+  --color-page-bg: #E4E9F4;
+  --color-white: #ffffff;
+
+  /* 阴影 */
+  --shadow-card: 0px 2px 30px rgba(0, 0, 0, 0.02);
+}
+
+:root {
+  --background: #EDF0F7;
+  --foreground: #222222;
+  --primary: #407FFF;
+  --secondary: #F5F5F5;
+  font-size: calc(100vw / 46.875);
+}
+
+body {
+  background: #E4E9F4;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.40) 0%, rgba(255, 255, 255, 0) 100%);
+  color: var(--foreground);
+  font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 装饰性模糊圆 - 蓝色 */
+body::before {
+  content: '';
+  position: fixed;
+  width: 790px;
+  height: 790px;
+  left: 308px;
+  top: 749px;
+  background: #7CACF9;
+  opacity: 0.4;
+  filter: blur(400px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 装饰性模糊圆 - 橙色 */
+body::after {
+  content: '';
+  position: fixed;
+  width: 609px;
+  height: 577px;
+  left: -194px;
+  top: 523px;
+  background: #FFA723;
+  opacity: 0.2;
+  filter: blur(300px);
+  box-shadow: 502px 756px 0 -200px rgba(218, 35, 255, 0.34);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 自定义滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+/* 输入框占位符样式 */
+::placeholder {
+  color: rgba(0, 0, 0, 0.15);
+}
+
+/* 隐藏滚动条但保留滚动功能 */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ============================================================
+   xmd-card：XMarkdown 自定义组件样式隔离层
+   所有通过 XMarkdown components 渲染的自定义卡片，
+   只需在根元素挂载此 class，即可重置 XMarkdown 注入的排版样式。
+
+   注意：
+   - 使用 .x-markdown 前缀提升特异性，确保覆盖 XMarkdown 的默认样式
+   - 不使用 @layer，因为无 layer 的样式优先级高于所有 @layer 内的样式
+   ============================================================ */
+.x-markdown .xmd-card {
+  /* 断词重置 */
+  div, span, p, li {
+    word-break: normal;
+    overflow-wrap: normal;
+    color: inherit;
+  }
+
+  /* 段落重置 */
+  p {
+    margin: 0;
+    padding: 0;
+    line-height: normal;
+  }
+
+  /* 标题重置 */
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    color: inherit;
+    font-weight: 600;
+  }
+
+  /* 列表重置 */
+  ul, ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* 链接重置 */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
