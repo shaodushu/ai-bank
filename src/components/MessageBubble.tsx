@@ -9,6 +9,7 @@ import FinancialProduct from './markdown/FinancialProduct';
 import LoanInfo from './markdown/LoanInfo';
 import Ask from './markdown/Ask';
 import PasswordInput from './markdown/PasswordInput';
+import FadeContent from './FadeContent';
 
 interface MessageBubbleProps {
   message: Message;
@@ -71,13 +72,15 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   // 用户消息：保持原有蓝色气泡样式
   if (isUser) {
     return (
-      <div className="flex justify-end mb-6 px-7">
-        <div className="max-w-[694px] rounded-[24px] px-6 py-6 bg-[#407FFF] text-white">
-          <p className="text-[28px] font-normal leading-relaxed font-pingfang">
-            {message.content}
-          </p>
+      <FadeContent blur={false} duration={300} threshold={0}>
+        <div className="flex justify-end mb-6 px-7">
+          <div className="max-w-[694px] rounded-[24px] px-6 py-6 bg-[#407FFF] text-white">
+            <p className="text-[28px] font-normal leading-relaxed font-pingfang">
+              {message.content}
+            </p>
+          </div>
         </div>
-      </div>
+      </FadeContent>
     );
   }
 
@@ -85,30 +88,32 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const { main, disclaimer, followup } = parseContentParts(message.content);
 
   return (
-    <div className="flex justify-start mb-6 px-7">
-      <div>
-        {/* 第一部分：主内容 Card（原气泡样式） */}
-        <div className="max-w-[694px] rounded-[24px] px-6 py-6 bg-white/60 text-primary-text">
-          <div className="text-[28px] font-pingfang">
-            <XMarkdown content={main} components={markdownComponents} />
+    <FadeContent blur={false} duration={300} threshold={0}>
+      <div className="flex justify-start mb-6 px-7">
+        <div>
+          {/* 第一部分：主内容 Card（原气泡样式） */}
+          <div className="max-w-[694px] rounded-[24px] px-6 py-6 bg-white/60 text-primary-text">
+            <div className="text-[28px] font-pingfang">
+              <XMarkdown content={main} components={markdownComponents} />
+            </div>
           </div>
+
+          {/* 第二部分：免责声明 */}
+          {disclaimer && (
+            <div className="mt-4 px-6 py-3 text-[20px] text-gray-400 italic">
+              {disclaimer}
+            </div>
+          )}
+
+          {/* 第三部分：追问或其他业务组件标签 */}
+          {followup && (
+            <div className="mt-4">
+              <XMarkdown content={followup} components={markdownComponents} />
+            </div>
+          )}
         </div>
-
-        {/* 第二部分：免责声明 */}
-        {disclaimer && (
-          <div className="mt-4 px-6 py-3 text-[20px] text-gray-400 italic">
-            {disclaimer}
-          </div>
-        )}
-
-        {/* 第三部分：追问或其他业务组件标签 */}
-        {followup && (
-          <div className="mt-4">
-            <XMarkdown content={followup} components={markdownComponents} />
-          </div>
-        )}
       </div>
-    </div>
+    </FadeContent>
   );
 };
 

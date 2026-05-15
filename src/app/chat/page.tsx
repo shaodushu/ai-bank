@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { MetadataProvider } from '@/components/markdown/MetadataContext';
 import ChatInterface from '@/components/ChatInterface';
@@ -20,8 +20,10 @@ function ChatPageInner() {
   }, [searchParams, sendMessage]);
 
   return (
-    <main className="flex min-h-screen flex-col">
-      <ChatInterface />
+    <main className="flex min-h-screen flex-col relative overflow-hidden">
+      <div className="relative z-10">
+        <ChatInterface />
+      </div>
     </main>
   );
 }
@@ -29,7 +31,9 @@ function ChatPageInner() {
 export default function ChatPage() {
   return (
     <MetadataProvider>
-      <ChatPageInner />
+      <Suspense fallback={null}>
+        <ChatPageInner />
+      </Suspense>
     </MetadataProvider>
   );
 }

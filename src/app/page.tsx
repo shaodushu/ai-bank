@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import BackgroundEffects from '@/components/BackgroundEffects';
 import WelcomeSection from '@/components/WelcomeSection';
 import InputBar from '@/components/InputBar';
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import IconButton from './IconButton';
+import FadeContent from './FadeContent';
 
 interface QuickQuestionsProps {
   onQuestionClick: (question: string) => void;
@@ -19,23 +20,29 @@ const QuickQuestions: React.FC<QuickQuestionsProps> = ({ onQuestionClick }) => {
         猜你想问
       </h2>
 
-      {/* 问题按钮列表 */}
+      {/* 问题按钮列表 - 逐项淡入 */}
       <div className="flex flex-col space-y-4">
         {questions.map((question, index) => (
-          <IconButton
+          <FadeContent
             key={index}
-            icon={
-              <img
-                src={question.icon}
-                alt="icon"
-                className="w-[35px] h-[35px]"
-              />
-            }
-            onClick={() => onQuestionClick(question.text)}
-            className={index === 0 ? 'w-[239px]' : 'w-[335px]'}
+            blur={true}
+            duration={600}
+            delay={index * 150}
           >
-            {question.text}
-          </IconButton>
+            <IconButton
+              icon={
+                <img
+                  src={question.icon}
+                  alt="icon"
+                  className="w-[35px] h-[35px]"
+                />
+              }
+              onClick={() => onQuestionClick(question.text)}
+              className={index === 0 ? 'w-[239px]' : 'w-[335px]'}
+            >
+              {question.text}
+            </IconButton>
+          </FadeContent>
         ))}
       </div>
     </div>
