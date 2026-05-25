@@ -142,6 +142,40 @@ export const MOCK_LOAN_INFO = [
 ];
 
 // ============================================================
+// Mock 数据 — 优惠券数据
+// ============================================================
+export const MOCK_COUPONS = [
+  {
+    id: 'coupon_001',
+    amount: '888',
+    label: '利息抵扣券',
+    title: '[12～24期] 限时免息券',
+    condition: '借款 9999～200000 元可用',
+    validity: '2019.04.29-2019.05.29',
+    expiringSoon: true,
+    rules: [
+      '限借款金额1万元以上',
+      '借款期数为12期',
+      '还款方式为等额本息',
+      '同时满足这几条才可使用优惠券',
+    ],
+  },
+  {
+    id: 'coupon_002',
+    amount: '188',
+    label: '手续费折扣券',
+    title: '[6～12期] 手续费折扣券',
+    condition: '借款 5000～100000 元可用',
+    validity: '2019.05.01-2019.06.01',
+    rules: [
+      '限借款金额5000元以上',
+      '借款期数为6期以上',
+      '还款方式不限',
+    ],
+  },
+];
+
+// ============================================================
 // ToolTagMapping：将工具函数与前端展示标签关联
 // 新增工具+标签时，只需在此添加一条配置即可
 // ============================================================
@@ -208,6 +242,35 @@ export const toolTagMappings: ToolTagMapping[] = [
     promptNote: '文本中只写标签，不要输出贷款信息的 JSON 代码块。贷款数据通过函数调用传递。',
     defaultPlaceholder: [],
     extractEntries: (args) => [{ key: args.dataKey, data: args.loanInfo }],
+  },
+  {
+    toolName: 'output_coupons',
+    tagName: 'CouponCard',
+    tagAttribute: 'data-key',
+    description: '展示优惠券信息',
+    promptNote: '文本中只写标签，不要输出优惠券数据的 JSON 代码块。优惠券数据通过函数调用传递。',
+    defaultPlaceholder: [],
+    // 修复模型可能输出的格式：coupons 可能是对象 {coupon_001:{...},coupon_002:{...}}
+    // 而非标准数组 [{"id":"coupon_001",...},{"id":"coupon_002",...}]
+    extractEntries: (args) => {
+      let coupons = args.coupons;
+      // 情况1：数组内嵌对象 [{coupon_001:{...},coupon_002:{...}}]
+      if (Array.isArray(coupons) && coupons.length === 1 && typeof coupons[0] === 'object' && !Array.isArray(coupons[0])) {
+        const inner = coupons[0];
+        const keys = Object.keys(inner);
+        if (keys.length > 0 && keys.some((k) => inner[k]?.id)) {
+          coupons = Object.values(inner);
+        }
+      }
+      // 情况2：直接是对象 {coupon_001:{...},coupon_002:{...}}
+      if (!Array.isArray(coupons) && typeof coupons === 'object' && coupons !== null) {
+        const keys = Object.keys(coupons);
+        if (keys.length > 0 && keys.some((k) => coupons[k]?.id)) {
+          coupons = Object.values(coupons);
+        }
+      }
+      return [{ key: args.dataKey, data: coupons }];
+    },
   },
 ];
 
@@ -454,6 +517,57 @@ export const chatTools: ChatCompletionTool[] = [
           },
         },
         required: ['dataKey', 'loanInfo'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_coupons',
+      description: '获取用户当前可用的优惠券列表。调用此工具获取真实的优惠券数据，然后将数据传递给 output_coupons 函数进行展示。不要自己编造优惠券数据，必须通过此工具获取。',
+      parameters: {
+        type: 'object',
+        properties: {},
+        required: [],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'output_coupons',
+      description:
+        '【必须调用】当用户询问优惠券信息时，你必须调用此函数来输出优惠券数据。注意 coupons 必须是标准数组格式：[{"id":"xxx","amount":"xxx"...}]，不要使用对象键值对格式 {"coupon_001":{"id":...}}。调用后必须在回复文本中插入 <CouponCard data-key="xxx" /> 标签，data-key 的值必须与函数参数中的 dataKey 完全一致。如果不调用此函数，前端将无法展示优惠券卡片。',
+      parameters: {
+        type: 'object',
+        properties: {
+          dataKey: {
+            type: 'string',
+            description:
+              '8位随机字符串（字母+数字），用于关联 CouponCard 标签。生成后必须在回复文本中使用 <CouponCard data-key="该值" />',
+          },
+          coupons: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string', description: '优惠券唯一标识' },
+                amount: { type: 'string', description: '优惠金额，如 "888"' },
+                label: { type: 'string', description: '优惠券类型标签，如 "利息抵扣券"' },
+                title: { type: 'string', description: '优惠券标题，如 "[12～24期] 限时免息券"' },
+                condition: { type: 'string', description: '使用条件描述，如 "借款 9999～200000 元可用"' },
+                validity: { type: 'string', description: '有效期，如 "2019.04.29-2019.05.29"' },
+                rules: {
+                  type: 'array',
+                  description: '使用规则说明列表，每项是独立的字符串。正确格式：["规则A","规则B"]，错误格式：["规则A": "规则B"]',
+                  items: { type: 'string' },
+                },
+              },
+              required: ['id', 'amount', 'label', 'title', 'condition', 'validity', 'rules'],
+            },
+          },
+        },
+        required: ['dataKey', 'coupons'],
       },
     },
   },

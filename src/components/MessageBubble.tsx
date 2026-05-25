@@ -9,6 +9,7 @@ import FinancialProduct from './markdown/FinancialProduct';
 import LoanInfo from './markdown/LoanInfo';
 import Ask from './markdown/Ask';
 import PasswordInput from './markdown/PasswordInput';
+import CouponCard from './markdown/CouponCard';
 import FadeContent from './FadeContent';
 
 interface MessageBubbleProps {
@@ -67,6 +68,8 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     Ask: (props: any) => <Ask {...props} _metadata={metadata} />,
     passwordinput: PasswordInput,
     PasswordInput: PasswordInput,
+    couponcard: (props: any) => <CouponCard {...props} _metadata={metadata} />,
+    CouponCard: (props: any) => <CouponCard {...props} _metadata={metadata} />,
   }), [metadata]);
 
   // 用户消息：保持原有蓝色气泡样式

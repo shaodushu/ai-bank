@@ -42,3 +42,8 @@ next-env.d.ts
 
 .codebuddy/
 assets/
+
+# temporary diff/patch files
+coupon-feature-final.diff
+coupon-feature.diff
+coupon-feature.patch

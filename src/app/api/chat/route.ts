@@ -8,6 +8,7 @@ import {
   MOCK_MANAGERS,
   MOCK_FINANCIAL_PRODUCTS,
   MOCK_LOAN_INFO,
+  MOCK_COUPONS,
 } from './tools';
 
 // ============================================================
@@ -63,6 +64,17 @@ function generateSystemPrompt(mappings: ToolTagMapping[]): string {
   prompt += `函数调用和标签中的 ${mappings[0]?.tagAttribute || 'data-key'} 值必须完全一致，否则前端无法渲染。`;
 
   return prompt;
+}
+
+// ============================================================
+// 从内容中移除 DSML 标记（模型可能输出的 <|DSML|...|> 等标签）
+// ============================================================
+function stripToolCallMarkup(text: string): string {
+  return text
+    .replace(/<\|[^|]+\|>/g, '')
+    .replace(/<\/?tool_calls[^>]*>/g, '')
+    .replace(/<\/?invoke[^>]*>/g, '')
+    .replace(/<\/?parameter[^>]*>/g, '');
 }
 
 // ============================================================
@@ -151,6 +163,13 @@ function executeToolCall(
       role: 'tool',
       tool_call_id: toolCall.id,
       content: JSON.stringify({ results: MOCK_LOAN_INFO }),
+    };
+  }
+  if (toolCall.function.name === 'get_coupons') {
+    return {
+      role: 'tool',
+      tool_call_id: toolCall.id,
+      content: JSON.stringify({ results: MOCK_COUPONS }),
     };
   }
   return null;
@@ -275,8 +294,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 兜底：如果标签有 data-key 但数据是空数组，使用 MOCK_COUPONS 作为默认展示
+    for (const [key, value] of Object.entries(metadata)) {
+      if (Array.isArray(value) && value.length === 0) {
+        const couponMapping = toolTagMappings.find((m) => m.tagName === 'CouponCard');
+        if (couponMapping && content.includes(`<CouponCard data-key="${key}"`)) {
+          metadata[key] = MOCK_COUPONS;
+        }
+      }
+    }
+
     // 自动补全缺失的展示标签
     content = autoCompleteTags(content, toolKeyMap, toolTagMappings);
+
+    // 移除 DSML 标记（防止模型输出 <|DSML|...|> 到前端）
+    content = stripToolCallMarkup(content);
 
     const encoder = new TextEncoder();
     const responseStream = new ReadableStream({
